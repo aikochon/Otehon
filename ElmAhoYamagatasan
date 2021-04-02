@@ -1,0 +1,82 @@
+module Main exposing (main)
+
+import Browser
+import Html exposing (Html, button, div, text)
+import Html.Events exposing (onClick)
+import List.Split exposing (chunksOfLeft, chunksOfRight)
+
+
+type alias Model =
+    { count : Int }
+
+
+initialModel : Model
+initialModel =
+    { count = 0 }
+
+
+type Msg
+    = Increment
+    | Decrement
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Increment ->
+            { model | count = model.count + 1 }
+
+        Decrement ->
+            { model | count = model.count - 1 }
+
+
+contains : Char -> String -> Bool
+contains c s =
+    let
+        --List.foldl()内関数 (a -> b -> b) の並び順のままかかれてる        
+        compare : Char -> Bool -> Bool
+        compare item accum =
+            if (accum == False) && (item == c) then
+                True
+
+            else
+                accum
+    in
+    --List.foldl (a -> b -> b) -> b -> List a -> b
+    --分解すると下記になる
+    --List.foldl (compare -> item -> accum) -> False -> (String.toList s)
+    List.foldl compare False (String.toList s)
+
+
+view : Model -> Html Msg
+view model =
+    let
+        print n =
+            if n == 0 then
+                String.fromInt n
+
+            else if modBy 3 n == 0 then
+                "AHO"
+
+            else if contains '3' (String.fromInt n) then
+                "AHO"
+
+            else
+                String.fromInt n
+    in
+    div []
+        [ button [ onClick Increment ] [ text "+1" ]
+        , div [] [ text <| print model.count ]
+
+        --, div [] [ text <| String.fromInt model.count ]
+        , button [ onClick Decrement ] [ text "-1" ]
+        ]
+
+
+main : Program () Model Msg
+main =
+    Browser.sandbox
+        { init = initialModel
+        , view = view
+        , update = update
+        }
